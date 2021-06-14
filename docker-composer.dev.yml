@@ -1,0 +1,58 @@
+
+version: '3.7'
+
+services:
+  # 1. Проект
+  web:
+    build:
+      # Директория 
+      context: ./src 
+      # Наиманование докерфайла который мы ищем  
+      dockerfile: dev.Dockerfile
+    # Наименование контейнера  
+    container_name: laravel-web 
+    # Переменные окружения  
+    environment:
+      - APPACHE_RUN_USER=www-data
+    volumes:
+      - ./src:/var/www/html/
+    # Порты    
+    ports:
+      - 80:8000
+    # Рабочая директория    
+    working_dir: /var/www/html/
+    # Своя сеть внутри контейнера
+    networks: 
+      - test-net
+
+  # 2. База данных
+  database:
+    image: mariadb
+    container_name: db-mariadb
+    restart: always
+    environment:
+        MYSQL_ROOT_PASSWORD: test
+    volumes:
+      - ./db:/var/lib/mysql
+    networks: 
+      - test-net    
+
+  # 3. Веб интерфейс Базы данных
+  adminer:
+    image: adminer
+    container_name: adm
+    restart: always
+    ports:
+      - 6080:8080
+    # Зависимость от контейнера database  
+    depends_on:
+      - database
+    networks: 
+      - test-net   
+# Сеть
+networks:
+  test-net:
+    external: true
+
+
+
